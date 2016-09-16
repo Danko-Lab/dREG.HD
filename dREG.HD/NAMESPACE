@@ -1,0 +1,12 @@
+import(parallel)
+import(e1071)
+import(bigWig)
+import(rphast)
+import(dREG)
+import(graphics)
+import(snowfall)
+import(methods)
+import(data.table)
+
+#exportClasses("genomic_data_model")
+export(dREG_HD)
