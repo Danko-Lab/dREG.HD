@@ -8,7 +8,7 @@ dREG_HD(bed_path,
       bigwig_minus, 
       chromInfo, 
       model_path,
-      ncores=4, 
+      ncores=1, 
       use_rgtsvm = FALSE )
 }
 \arguments{

@@ -17,6 +17,7 @@ if (is.na(ncores)) ncores <- 1;
 
 use_rgtsvm <- FALSE;
 use_gpu <- toupper(as.character(args[7]))
+
 if (!is.na(use_gpu) && use_gpu=="GPU") use_rgtsvm <- TRUE;
 
 
@@ -32,7 +33,6 @@ if (use_rgtsvm)
 
 
 ## Now running dREG-HD
-
 t <- system.time( dREG_HD(bed_path= bed_path, bigwig_plus = ps_plus_path, bigwig_minus = ps_minus_path,chromInfo= chromInfo, model_path= model, ncores = ncores, use_rgtsvm= use_rgtsvm))
 
 cat("Running time [User]:", t[1], "[System]:", t[2], "[Elapsed]:", t[3], "\n");

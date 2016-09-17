@@ -25,7 +25,7 @@ bwMN=$3
 model=$4
 chromInfo=$5
 gpu=FALSE
-ncores=4
+ncores=1
 
 if [ "$#" -gt 5 ]; then
 	ncores=$6
@@ -34,8 +34,9 @@ else
 fi
 
 if [ "$#" -gt 6 ]; then
-	gpu=$6
+	gpu=$7
 fi
+
 
 echo "Using: R --vanilla --slave --args $bed $bwPL $bwMN $model $chromInfo $ncores $gpu < $bsh_path/run_dREG-HD.R"
 R --vanilla --slave --args $bed $bwPL $bwMN $model $chromInfo $ncores $gpu < $bsh_path/run_dREG-HD.R
