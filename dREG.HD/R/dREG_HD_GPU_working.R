@@ -212,7 +212,7 @@ run_dREG_HD_pred<-function(gdm, bed,bigwig_plus,bigwig_minus, model,total, temp.
 
 		dat<-do.call(rbind.data.frame,sfLapply(x=1:blocks,fun= cpu.fun, line.cutoff= line.cutoff, dREG_bed_ext= bed,zoom= zoom,bigwig_plus = bigwig_plus, bigwig_minus = bigwig_minus, total = total))
 		sfStop()
-		sfRemoveAll()
+		#sfRemoveAll()
 
 
 		pos<-dat[,1:3]
