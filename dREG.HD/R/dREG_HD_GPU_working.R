@@ -208,13 +208,15 @@ run_dREG_HD_pred<-function(gdm, bed,bigwig_plus,bigwig_minus, model,total, temp.
 	  	
 		sfInit(parallel = TRUE, cpus = blocks, type = "SOCK" )
 		sfExport("blocks","line.cutoff","bed","zoom","bigwig_plus","bigwig_minus","total");
+				#sfExport("blocks","line.cutoff","bed","zoom","bigwig_plus","bigwig_minus","total","dREG_HD_get_dat","fix_distribution");
+
 		dat<-do.call(rbind.data.frame,sfLapply(x=1:blocks,fun= cpu.fun, line.cutoff= line.cutoff, dREG_bed_ext= bed,zoom= zoom,bigwig_plus = bigwig_plus, bigwig_minus = bigwig_minus, total = total))
 		sfStop()
 		sfRemoveAll()
 
 
 		pos<-dat[,1:3]
-		ret <- predict(model,dat[,4:ncol(dat)])
+		ret <- Rgtsvm::predict.gtsvm(model,dat[,4:ncol(dat)])
 		rm(dat)
 		gc()		
 		stopifnot(nrow(pos)==sum(bed$V3-bed$V2))
@@ -258,7 +260,7 @@ run_dREG_HD_pred<-function(gdm, bed,bigwig_plus,bigwig_minus, model,total, temp.
 
 
 split.bed.evenly<-function(bed){
-	GPU<-0.8
+	GPU<-1.8
 	tot.num.examples <-as.integer(GPU*1024*1024*1024/8/123)
 	line.cutoff<-c(0)
 	current.row<-1
@@ -341,7 +343,6 @@ dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus,chromInfo, model_path, nco
 	#relaxed mode
 
 	print("calling peaks under relaxed condition")
-
 	dREG_HD_bed <-rbindlist(mclapply(X=1: ncores,FUN= cpu.fun, line.cutoff= line.cutoff, returned_pred_data= returned_pred_data, knots.ratio= 397.4,background=0.02, mc.cores = ncores))
 
 	dREG_HD.filename<-paste(bed_path,"_dREG_HD_relaxed.bed",sep="")

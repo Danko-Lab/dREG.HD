@@ -26,8 +26,6 @@ if (use_rgtsvm)
  {
    if(!requireNamespace("Rgtsvm"))
    stop("Rgtsvm has not been installed fotr GPU computing.");
-
-    predict = Rgtsvm::predict.gtsvm;
   }
 
 
