@@ -5,24 +5,23 @@ get.chrom.length<-function(chr, chrom.info.table){
 	return(chrom.info.table[(chrom.info.table[,1]==chr),2])
 }
 
-
 #extract to construct bedgraph and then to bigwig
 tobigwig<-function(filename, temp.bg, chromInfo){
 	#get bedgraph
-	
+
 	bedgraph.sorted=tempfile()
-	
+
 	options(scipen =99) # not to use scientific notation when writing out
-	
+
 	#write bedgraph formatted dataframes to tempfile
   	#write.table(bedgraph,file= bedgraph.file,quote=F,sep="\t",col.names=F,row.names=F)
   	command=paste("LC_COLLATE=C sort -k1,1 -k2,2n", temp.bg, "| uniq >", bedgraph.sorted,sep=" ")
   	#browser()
-  	 try(system(command)) 
-  	
+  	 try(system(command))
+
   	command=paste("bedGraphToBigWig", bedgraph.sorted, chromInfo ,filename, sep=" ")
   	#cat(command,"\n")
-    try(system(command)) 
+    try(system(command))
     #unlink(bedgraph.file)
     unlink(bedgraph.sorted)
 }
@@ -34,15 +33,15 @@ bedTools.merge<-function(bed)
   a.file=tempfile()
   out   =tempfile()
   options(scipen =99) # not to use scientific notation when writing out
- 
+
   #write bed formatted dataframes to tempfile
   write.table(bed,file=a.file,quote=F,sep="\t",col.names=F,row.names=F)
- 
+
   # create the command string and call the command using system()
   command=paste("LC_COLLATE=C sort -k1,1 -k2,2n",a.file,"| mergeBed -i stdin >",out,sep=" ")
   #cat(command,"\n")
   try(system(command))
- 
+
   res=read.table(out,header=F)
   unlink(a.file);unlink(out)
   return(res)
@@ -56,16 +55,16 @@ bedTools.2in<-function(functionstring="bedIntersect",bed1,bed2,opt.string="")
   b.file=tempfile()
   out   =tempfile()
   options(scipen =99) # not to use scientific notation when writing out
- 
+
   #write bed formatted dataframes to tempfile
   write.table(bed1,file=a.file,quote=F,sep="\t",col.names=F,row.names=F)
   write.table(bed2,file=b.file,quote=F,sep="\t",col.names=F,row.names=F)
- 
+
   # create the command string and call the command using system()
   command=paste(functionstring,"-a",a.file,"-b",b.file,opt.string,">",out,sep=" ")
   # cat(command,"\n")
   try(system(command))
- 
+
   res=read.table(out,header=F)
   unlink(a.file);unlink(b.file);unlink(out)
   return(res)
@@ -81,7 +80,7 @@ scan_for_peak<-function(potential.peak.positions){
 	peak.starts<-c(1)
 	peak.ends<-c()
 	i<-1
-	while (i< length.tot){ 
+	while (i< length.tot){
 			if(potential.peak.positions[i+1]!=potential.peak.positions[i]+1){
 			#break point found
 			peak.starts<-c(peak.starts,i+1)
@@ -89,8 +88,8 @@ scan_for_peak<-function(potential.peak.positions){
 			}
 			i<-i+1
 		}
-	peak.ends<-c(peak.ends ,length.tot)	
-	return (cbind(potential.peak.positions [peak.starts[!is.na(peak.ends)]], (potential.peak.positions [peak.ends[!is.na(peak.ends)]]+1)))	
+	peak.ends<-c(peak.ends ,length.tot)
+	return (cbind(potential.peak.positions [peak.starts[!is.na(peak.ends)]], (potential.peak.positions [peak.ends[!is.na(peak.ends)]]+1)))
 }
 
 
@@ -104,7 +103,7 @@ D1.criterion.filter<-function(peaks, spl.model, start){
 			if(prod(D1.val)<=0) position.pass.or.not <-c(position.pass.or.not, TRUE)
 			else position.pass.or.not <-c(position.pass.or.not, FALSE)
 		}
-		peak.pass.or.not<-c(peak.pass.or.not, sum(position.pass.or.not)>0) #or ==1? whichever is faster	
+		peak.pass.or.not<-c(peak.pass.or.not, sum(position.pass.or.not)>0) #or ==1? whichever is faster
 	}
 	return (matrix(peaks [peak.pass.or.not,],byrow=FALSE, ncol=2))
 }
@@ -116,11 +115,11 @@ split_peak<-function(predicted_data, knots.ratio, background){
 	positions.ONEbased<-full.vec-full.vec[1]+1
 	#chose degree of freedom proportional to peak length
 	df<-as.integer(length(full.vec)/knots.ratio)+3
-	
-	
+
+
 	#print(length(positions.ONEbased))
 	#print(length(predicted_data))
-	
+
 	dnase.spl<-smooth.spline(positions.ONEbased,predicted_data,df=df)
 	D0.val<-predict(dnase.spl,x=c(1:length(full.vec)))$y
 	D2.val<-predict(dnase.spl,x=c(1:length(full.vec)),deriv=2)$y
@@ -128,12 +127,12 @@ split_peak<-function(predicted_data, knots.ratio, background){
 	potential.peak.positions.D2<-full.vec[D2.val<0]
 	#get the positions above the Dnase value background level
 	 potential.peak.positions.D0 <- full.vec[predicted_data> background]
-	 
-	 
+
+
 	potential.peak.positions<-intersect (potential.peak.positions.D2, potential.peak.positions.D0)
 	#scan for continuous peak that passes minimun peak length defined
 	peaks<-scan_for_peak(potential.peak.positions)
-	
+
 	#further filtering the peak using "change of sign criterion" of 1st order derivative
 	if(!is.null(peaks)){
 		if(nrow(peaks)!=0){
@@ -142,7 +141,7 @@ split_peak<-function(predicted_data, knots.ratio, background){
 			return (peak.dataframe)
 		}
 	}
-	
+
 }
 
 
@@ -150,7 +149,7 @@ split_peak<-function(predicted_data, knots.ratio, background){
 
 fix_distribution<-function(dat){
 	#training.max reference determined by 150K+ training examples over true +ve dREG regions (both dnase and grocap +ve) 90% percentile of max(training example input vectors)
-	
+
 	training.max<-4.341949
 	dat.max<-max(dat)
 	if(dat.max <=training.max) return(dat)
@@ -169,17 +168,17 @@ dREG_HD_get_dat <-function( bed_line,  zoom, bigwig_plus, bigwig_minus,total){
 	start<-as.integer(bed_line[[2]])
 	end<-as.integer(bed_line[[3]])-1
 	positions<-c(start:end)
-	
+
 	#scaling using total read depth
 	dat_unscaled <- .Call("get_genomic_data_R", as.character(rep(chrom,length(positions))), as.integer(positions), as.character(bigwig_plus), as.character(bigwig_minus), zoom, FALSE, PACKAGE= "dREG")
 	dat_unscaled <-unlist (dat_unscaled)/(total/1E6)
 	dat<- cbind(rep(),t(matrix(dat_unscaled, ncol=NROW(positions))))
 	dat<-fix_distribution(dat)
-	
+
 	stopifnot(nrow(dat)==length(positions))
-	
+
 	cbind.data.frame(chrom, positions, positions+1, dat)
-	
+
 }
 
 
@@ -188,11 +187,11 @@ run_dREG_HD_pred<-function(gdm, bed,bigwig_plus,bigwig_minus, model,total, temp.
 
 	stopifnot(NROW(gdm@window_sizes) == NROW(gdm@half_nWindows))
 	zoom<- list(as.integer(gdm@window_sizes), as.integer(gdm@half_nWindows))
-	
-	
+
+
 	if (nrow(bed)<ncores) blocks=nrow(bed)
 	else blocks= ncores
-	
+
 	line.cutoff<-as.integer(seq(from=0, to=nrow(bed),length.out= blocks+1))
 
 
@@ -202,10 +201,10 @@ run_dREG_HD_pred<-function(gdm, bed,bigwig_plus,bigwig_minus, model,total, temp.
 
 		cpu.fun<-function(idx, line.cutoff, dREG_bed_ext, zoom, bigwig_plus, bigwig_minus,total){
 		requireNamespace("dREG")
-	
+
 		do.call(rbind.data.frame,apply(dREG_bed_ext[c((line.cutoff[idx]+1):line.cutoff[idx+1]),],MARGIN=1,FUN= dREG_HD_get_dat,zoom= zoom, bigwig_plus= bigwig_plus, bigwig_minus= bigwig_minus,total= total))
 	}
-	  	
+
 		sfInit(parallel = TRUE, cpus = blocks, type = "SOCK" )
 		sfExport("blocks","line.cutoff","bed","zoom","bigwig_plus","bigwig_minus","total");
 				#sfExport("blocks","line.cutoff","bed","zoom","bigwig_plus","bigwig_minus","total","dREG_HD_get_dat","fix_distribution");
@@ -218,9 +217,9 @@ run_dREG_HD_pred<-function(gdm, bed,bigwig_plus,bigwig_minus, model,total, temp.
 		pos<-dat[,1:3]
 		ret <- Rgtsvm::predict.gtsvm(model,dat[,4:ncol(dat)])
 		rm(dat)
-		gc()		
+		gc()
 		stopifnot(nrow(pos)==sum(bed$V3-bed$V2))
-		
+
 		options(scipen =99)
 	 	write.table(cbind.data.frame(pos,ret),file=temp.bg,quote=F,sep="\t",col.names=F,row.names=F,append = TRUE)
 }
@@ -228,7 +227,7 @@ run_dREG_HD_pred<-function(gdm, bed,bigwig_plus,bigwig_minus, model,total, temp.
 
 
 	else{
-	
+
 		cpu.fun<-function(idx, line.cutoff, dREG_bed_ext, zoom, bigwig_plus, bigwig_minus,total,model)	{
 			requireNamespace("dREG")
 			requireNamespace("e1071")
@@ -238,9 +237,9 @@ run_dREG_HD_pred<-function(gdm, bed,bigwig_plus,bigwig_minus, model,total, temp.
 			rm(dat)
 			gc()
 			cbind.data.frame(pos,ret)
-		
+
 		}
-	  	
+
 		sfInit(parallel = TRUE, cpus = blocks, type = "SOCK" )
 		sfExport("blocks","line.cutoff","bed","zoom","bigwig_plus","bigwig_minus","total")
 		dat<-do.call(rbind.data.frame,sfLapply(x=1:blocks,fun= cpu.fun, line.cutoff= line.cutoff, dREG_bed_ext= bed,zoom= zoom,bigwig_plus = bigwig_plus, bigwig_minus = bigwig_minus, total = total,model=model))
@@ -249,11 +248,11 @@ run_dREG_HD_pred<-function(gdm, bed,bigwig_plus,bigwig_minus, model,total, temp.
 
 		stopifnot(nrow(dat)==sum(bed$V3-bed$V2))
 		options(scipen =99)
-	
+
 		write.table(dat,file=temp.bg,quote=F,sep="\t",col.names=F,row.names=F,append = TRUE)
 	}
-	
-	gc()		
+
+	gc()
 	return(NULL)
 }
 
@@ -273,14 +272,14 @@ split.bed.evenly<-function(bed){
 		}
 		line.cutoff<-c(line.cutoff,current.row-1)
 	}
-		
+
 	return(line.cutoff)
-	
+
 }
 
 
 #main function runs prediction for blocks of dREG_bed in parallel
-dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus,chromInfo, model_path, ncores=1, use_rgtsvm=FALSE){
+dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus,chromInfo, model, ncores=1, use_rgtsvm=FALSE){
 
 	#Step1: imputing Dnase-I signal in parallel mode
 	cat("running dREG-HD on ", bed_path,"\n")
@@ -297,16 +296,15 @@ dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus,chromInfo, model_path, nco
 	dREG_bed_ext<-cbind.data.frame(dREG_bed$V1, apply(cbind(0,(dREG_bed$V2-ext)), MARGIN=1, FUN=max), apply(cbind(sapply(as.character(dREG_bed$V1), FUN= get.chrom.length, chrom.info.table),(dREG_bed$V3+ext)), MARGIN=1, FUN=min))
 	dREG_bed_ext<-bedTools.merge(dREG_bed_ext)
 
-	
-	load(model_path)
+
 	if(use_rgtsvm) class(model)<-"gtsvm"
 	gdm<-genomic_data_model(60,30)
 
 	line.cutoff<-split.bed.evenly(dREG_bed_ext)
 	blocks<-length(line.cutoff)-1
-	
+
 	cat("number of total blocks=",blocks,"\n")
-	
+
 	cpu.fun<-function(idx, line.cutoff, dREG_bed_ext,bigwig_plus, bigwig_minus, gdm, model,total, temp.bg, ncores, use_rgtsvm){
 		print(idx)
 		dREG_bed_ext_part<-dREG_bed_ext[c((line.cutoff[idx]+1):line.cutoff[idx+1]),]
@@ -315,10 +313,10 @@ dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus,chromInfo, model_path, nco
 		gc()
 		return(NULL)
 	  }
-		
+
 	temp.bg=tempfile()
 	lapply(c(1:blocks),FUN= cpu.fun,line.cutoff= line.cutoff, dREG_bed_ext= dREG_bed_ext,bigwig_plus= bigwig_plus, bigwig_minus= bigwig_minus, gdm=gdm, model=model,total=total, temp.bg= temp.bg,ncores= ncores, use_rgtsvm= use_rgtsvm)
-	
+
 	#Step2: generate bigwig file from "returned_pred_data" file
 	bw.filename<-paste(bed_path,"_imputedDnase.bw",sep="")
 	tobigwig(filename=bw.filename, temp.bg = temp.bg, chromInfo= chromInfo)
@@ -336,7 +334,7 @@ dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus,chromInfo, model_path, nco
 	  returned_pred_data_part <-returned_pred_data[c((line.cutoff[idx]+1):line.cutoff[idx+1])]
 	  rbindlist(lapply(returned_pred_data_part,FUN= split_peak, knots.ratio= knots.ratio,background= background))
 	  }
-	  
+
 
 	line.cutoff=as.integer(seq(from=0, to=length(returned_pred_data),length.out= ncores+1 ))
 
@@ -358,7 +356,7 @@ dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus,chromInfo, model_path, nco
 
 	#stringent mode
 	dREG_HD_bed <-rbindlist(mclapply(X=1:ncores,FUN= cpu.fun, line.cutoff = line.cutoff ,returned_pred_data= returned_pred_data, knots.ratio= 1350,background= 0.02723683,mc.cores = ncores))
-dREG_HD.filename<-paste(bed_path,"_dREG_HD_stringent.bed",sep="")
+	dREG_HD.filename<-paste(bed_path,"_dREG_HD_stringent.bed",sep="")
 
 	dREG_HD_bed.intersected<-bedTools.2in ("bedtools intersect -u", dREG_HD_bed, dREG_bed)
 	dREG_HD_bed.intersected.merged<-bedTools.merge(dREG_HD_bed.intersected)

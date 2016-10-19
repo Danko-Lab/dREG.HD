@@ -4,7 +4,7 @@ require(dREG.HD)
 args <- commandArgs(trailingOnly=TRUE)
 
 ## Load the model.  Do this before loading ps_plus_path, just in case those are saved in the model file.
-model <- args[4]
+model_path <- args[4]
 #load(dreg_model) ## Should have (by default) gdm and asvm.
 
 ## Read PRO-seq data.
@@ -28,10 +28,10 @@ if (use_rgtsvm)
    stop("Rgtsvm has not been installed fotr GPU computing.");
   }
 
-
+load(model_path);
 
 ## Now running dREG-HD
-t <- system.time( dREG_HD(bed_path= bed_path, bigwig_plus = ps_plus_path, bigwig_minus = ps_minus_path,chromInfo= chromInfo, model_path= model, ncores = ncores, use_rgtsvm= use_rgtsvm))
+t <- system.time( dREG_HD(bed_path= bed_path, bigwig_plus = ps_plus_path, bigwig_minus = ps_minus_path,chromInfo= chromInfo, model= model, ncores = ncores, use_rgtsvm= use_rgtsvm))
 
 cat("Running time [User]:", t[1], "[System]:", t[2], "[Elapsed]:", t[3], "\n");
 
