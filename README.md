@@ -27,7 +27,7 @@ dREG.HD is only available for the Linux and Mac OSX. The source code can be down
     
 ### Install dREG.HD
 
-Please install the required R package before you install dREG.HD package. After the  installation of `dREG`, `snowfall` and `data.table` package, please install the #dREG.HD# as following steps.
+Please install the required R package before you install dREG.HD package. After the  installation of `dREG`, `snowfall` and `data.table` package, please install the **dREG.HD** as following steps.
 
 ```
 git clone https://github.com/Danko-Lab/dREG.HD.git
