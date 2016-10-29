@@ -62,7 +62,9 @@ chromInfo       -- the chromInfo file required for generating bigwig file of imp
 
 ```
 
-An example is ./run_dREG-HD.bsh ./dREG.HD/inst/extdata/k562.predictions.3000.bed ./dREG.HD/inst/extdata/K562_unt.sort.bed.gz_plus.bw ./dREG.HD/inst/extdata/K562_unt.sort.bed.gz_minus.bw ./dREG.HD/inst/extdata/dREG_HD.model.rdata ./dREG.HD/inst/extdata/chromInfo.hg19 14 GPU
+An example is 
+
+bash ./run_dREG-HD.bsh ./dREG.HD/inst/extdata/k562.predictions.3000.bed ./dREG.HD/inst/extdata/K562_unt.sort.bed.gz_plus.bw ./dREG.HD/inst/extdata/K562_unt.sort.bed.gz_minus.bw ./dREG.HD/inst/extdata/dREG_HD.model.rdata ./dREG.HD/inst/extdata/chromInfo.hg19 14 GPU
 
 
 dREG.HD needs the package `Rgtsvm` to run on GPU. This SVM package on GPU platform can be downloaded from (https://github.com/Danko-Lab/Rgtsvm.git)
