@@ -76,9 +76,9 @@ dREG.HD is an R package, and that provides some additional flexibility for users
 
 ```
 
-prefix_imputedDnase.bw	      -- the imputed DNase-I signal.
-prefix_dREG_HD_relaxed.bed	  -- dREG.HD peaks called under relaxed condition (FDR=16%)
-prefix_dREG_HD_stringent.bed  -- dREG.HD peaks called under stringent condition (FDR=10%)
+${prefix}_imputedDnase.bw	      -- the imputed DNase-I signal.
+${prefix}_dREG_HD_relaxed.bed	  -- dREG.HD peaks called under relaxed condition (FDR=16%)
+${prefix}_dREG_HD_stringent.bed   -- dREG.HD peaks called under stringent condition (FDR=10%)
 
 ```
 
