@@ -81,13 +81,13 @@ scan_for_peak<-function(potential.peak.positions){
 	peak.ends<-c()
 	i<-1
 	while (i< length.tot){
-			if(potential.peak.positions[i+1]!=potential.peak.positions[i]+1){
-			#break point found
-			peak.starts<-c(peak.starts,i+1)
-			peak.ends<-c(peak.ends,i)
-			}
-			i<-i+1
+		if(potential.peak.positions[i+1]!=potential.peak.positions[i]+1){
+		#break point found
+		peak.starts<-c(peak.starts,i+1)
+		peak.ends<-c(peak.ends,i)
 		}
+		i<-i+1
+	}
 	peak.ends<-c(peak.ends ,length.tot)
 	return (cbind(potential.peak.positions [peak.starts[!is.na(peak.ends)]], (potential.peak.positions [peak.ends[!is.na(peak.ends)]]+1)))
 }
@@ -195,19 +195,17 @@ run_dREG_HD_pred<-function(gdm, bed,bigwig_plus,bigwig_minus, model,total, temp.
 	line.cutoff<-as.integer(seq(from=0, to=nrow(bed),length.out= blocks+1))
 
 
-
-
 	if(use_rgtsvm){
 
 		cpu.fun<-function(idx, line.cutoff, dREG_bed_ext, zoom, bigwig_plus, bigwig_minus,total){
-		requireNamespace("dREG")
+			requireNamespace("dREG")
 
-		do.call(rbind.data.frame,apply(dREG_bed_ext[c((line.cutoff[idx]+1):line.cutoff[idx+1]),],MARGIN=1,FUN= dREG_HD_get_dat,zoom= zoom, bigwig_plus= bigwig_plus, bigwig_minus= bigwig_minus,total= total))
-	}
+			do.call(rbind.data.frame,apply(dREG_bed_ext[c((line.cutoff[idx]+1):line.cutoff[idx+1]),],MARGIN=1,FUN= dREG_HD_get_dat,zoom= zoom, bigwig_plus= bigwig_plus, bigwig_minus= bigwig_minus,total= total))
+		}
 
 		sfInit(parallel = TRUE, cpus = blocks, type = "SOCK" )
 		sfExport("blocks","line.cutoff","bed","zoom","bigwig_plus","bigwig_minus","total");
-				#sfExport("blocks","line.cutoff","bed","zoom","bigwig_plus","bigwig_minus","total","dREG_HD_get_dat","fix_distribution");
+			#sfExport("blocks","line.cutoff","bed","zoom","bigwig_plus","bigwig_minus","total","dREG_HD_get_dat","fix_distribution");
 
 		dat<-do.call(rbind.data.frame,sfLapply(x=1:blocks,fun= cpu.fun, line.cutoff= line.cutoff, dREG_bed_ext= bed,zoom= zoom,bigwig_plus = bigwig_plus, bigwig_minus = bigwig_minus, total = total))
 		sfStop()
@@ -217,15 +215,12 @@ run_dREG_HD_pred<-function(gdm, bed,bigwig_plus,bigwig_minus, model,total, temp.
 		pos<-dat[,1:3]
 		ret <- Rgtsvm::predict.gtsvm(model,dat[,4:ncol(dat)])
 		rm(dat)
-		gc()
+		gc(verbose=TRUE, reset=TRUE)
 		stopifnot(nrow(pos)==sum(bed$V3-bed$V2))
 
 		options(scipen =99)
-	 	write.table(cbind.data.frame(pos,ret),file=temp.bg,quote=F,sep="\t",col.names=F,row.names=F,append = TRUE)
-}
-
-
-
+		write.table(cbind.data.frame(pos,ret),file=temp.bg,quote=F,sep="\t",col.names=F,row.names=F,append = TRUE)
+	}
 	else{
 
 		cpu.fun<-function(idx, line.cutoff, dREG_bed_ext, zoom, bigwig_plus, bigwig_minus,total,model)	{
@@ -235,7 +230,7 @@ run_dREG_HD_pred<-function(gdm, bed,bigwig_plus,bigwig_minus, model,total, temp.
 			pos<-dat[,1:3]
 			ret <- predict(model,dat[,4:ncol(dat)])
 			rm(dat)
-			gc()
+			gc(verbose=TRUE, reset=TRUE)
 			cbind.data.frame(pos,ret)
 
 		}
@@ -252,10 +247,9 @@ run_dREG_HD_pred<-function(gdm, bed,bigwig_plus,bigwig_minus, model,total, temp.
 		write.table(dat,file=temp.bg,quote=F,sep="\t",col.names=F,row.names=F,append = TRUE)
 	}
 
-	gc()
+	gc(verbose=TRUE, reset=TRUE)
 	return(NULL)
 }
-
 
 
 split.bed.evenly<-function(bed){
@@ -282,85 +276,82 @@ split.bed.evenly<-function(bed){
 dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus,chromInfo, model, ncores=1, use_rgtsvm=FALSE){
 
 	#Step1: imputing Dnase-I signal in parallel mode
-	cat("running dREG-HD on ", bed_path,"\n")
+	cat("running dREG-HD on ", bed_path,"\n");
 
-	bw.plus <- load.bigWig(bigwig_plus)
-	bw.minus <-  load.bigWig(bigwig_minus)
-	total<-abs(bw.plus$mean*bw.plus$basesCovered)+abs(bw.minus$mean*bw.minus$basesCovered)
-	unload.bigWig(bw.plus)
-	unload.bigWig(bw.minus)
+	bw.plus <- load.bigWig(bigwig_plus);
+	bw.minus <-  load.bigWig(bigwig_minus);
+	total<-abs(bw.plus$mean*bw.plus$basesCovered)+abs(bw.minus$mean*bw.minus$basesCovered);
+	unload.bigWig(bw.plus);
+	unload.bigWig(bw.minus);
 
 	ext=200 #impute on extended dREG site
-	dREG_bed<-read.table(bed_path)
-	chrom.info.table<-read.table(chromInfo)
-	dREG_bed_ext<-cbind.data.frame(dREG_bed$V1, apply(cbind(0,(dREG_bed$V2-ext)), MARGIN=1, FUN=max), apply(cbind(sapply(as.character(dREG_bed$V1), FUN= get.chrom.length, chrom.info.table),(dREG_bed$V3+ext)), MARGIN=1, FUN=min))
-	dREG_bed_ext<-bedTools.merge(dREG_bed_ext)
-
+	dREG_bed<-read.table(bed_path);
+	chrom.info.table<-read.table(chromInfo);
+	dREG_bed_ext<-cbind.data.frame(dREG_bed$V1, apply(cbind(0,(dREG_bed$V2-ext)), MARGIN=1, FUN=max), apply(cbind(sapply(as.character(dREG_bed$V1), FUN= get.chrom.length, chrom.info.table),(dREG_bed$V3+ext)), MARGIN=1, FUN=min));
+	dREG_bed_ext<-bedTools.merge(dREG_bed_ext);
 
 	if(use_rgtsvm) class(model)<-"gtsvm"
-	gdm<-genomic_data_model(60,30)
+	gdm<-genomic_data_model(60,30);
 
-	line.cutoff<-split.bed.evenly(dREG_bed_ext)
-	blocks<-length(line.cutoff)-1
+	line.cutoff<-split.bed.evenly(dREG_bed_ext);
+	blocks<-length(line.cutoff)-1;
 
 	cat("number of total blocks=",blocks,"\n")
 
 	cpu.fun<-function(idx, line.cutoff, dREG_bed_ext,bigwig_plus, bigwig_minus, gdm, model,total, temp.bg, ncores, use_rgtsvm){
-		print(idx)
+		print(idx);
 		dREG_bed_ext_part<-dREG_bed_ext[c((line.cutoff[idx]+1):line.cutoff[idx+1]),]
 		run_dREG_HD_pred(gdm=gdm, bed= dREG_bed_ext_part,bigwig_plus= bigwig_plus, bigwig_minus= bigwig_minus, model= model,total= total, temp.bg= temp.bg, ncores= ncores, use_rgtsvm= use_rgtsvm)
-	  	rm(list=ls())
-		gc()
-		return(NULL)
+	  	rm(list=ls());
+		gc(verbose=TRUE, reset=TRUE);
+		return(NULL);
 	  }
 
-	temp.bg=tempfile()
+	temp.bg=tempfile();
 	lapply(c(1:blocks),FUN= cpu.fun,line.cutoff= line.cutoff, dREG_bed_ext= dREG_bed_ext,bigwig_plus= bigwig_plus, bigwig_minus= bigwig_minus, gdm=gdm, model=model,total=total, temp.bg= temp.bg,ncores= ncores, use_rgtsvm= use_rgtsvm)
 
 	#Step2: generate bigwig file from "returned_pred_data" file
 	bw.filename<-paste(bed_path,"_imputedDnase.bw",sep="")
 	tobigwig(filename=bw.filename, temp.bg = temp.bg, chromInfo= chromInfo)
-	unlink(temp.bg)
-	rm(model)
-	gc()
+	unlink(temp.bg);
+	rm(model);
+	gc(verbose=TRUE, reset=TRUE);
 
 	#Step three generate dREG HD peaks
-	imputed_dnase.bw<-load.bigWig(bw.filename)
-	returned_pred_data <-bed.step.bpQuery.bigWig(bw= imputed_dnase.bw,bed= dREG_bed_ext,step=1)
-	unload.bigWig(imputed_dnase.bw)
-	gc()
-
-	cpu.fun<-function(idx, line.cutoff, returned_pred_data,knots.ratio,background){
-	  returned_pred_data_part <-returned_pred_data[c((line.cutoff[idx]+1):line.cutoff[idx+1])]
-	  rbindlist(lapply(returned_pred_data_part,FUN= split_peak, knots.ratio= knots.ratio,background= background))
-	  }
-
+	imputed_dnase.bw<-load.bigWig(bw.filename);
+	returned_pred_data <-bed.step.bpQuery.bigWig(bw= imputed_dnase.bw,bed= dREG_bed_ext,step=1);
+	unload.bigWig(imputed_dnase.bw);
+	gc(verbose=TRUE, reset=TRUE);
 
 	line.cutoff=as.integer(seq(from=0, to=length(returned_pred_data),length.out= ncores+1 ))
+	returned_pred_data_list <- list();
+	for( i in 1:(length(line.cutoff)-1) )
+    	returned_pred_data_list[[i]] <- returned_pred_data[ c((line.cutoff[i]+1):line.cutoff[i+1])];
+
+	cpu.fun<-function(idx, knots.ratio,background){
+	    rbindlist(lapply(returned_pred_data_list[[idx]], FUN= split_peak, knots.ratio= knots.ratio, background= background));
+	}
 
 	#relaxed mode
+	print("calling peaks under relaxed condition");
+	dREG_HD_bed <- rbindlist( mclapply( 1:ncores, FUN= cpu.fun, knots.ratio= 397.4,background=0.02, mc.cores = ncores ) );
+	dREG_HD.filename<-paste(bed_path,"_dREG_HD_relaxed.bed",sep="");
 
-	print("calling peaks under relaxed condition")
-	dREG_HD_bed <-rbindlist(mclapply(X=1: ncores,FUN= cpu.fun, line.cutoff= line.cutoff, returned_pred_data= returned_pred_data, knots.ratio= 397.4,background=0.02, mc.cores = ncores))
+	dREG_HD_bed.intersected<-bedTools.2in ("bedtools intersect -u", dREG_HD_bed, dREG_bed);
+	dREG_HD_bed.intersected.merged<-bedTools.merge(dREG_HD_bed.intersected);
+	write.table(dREG_HD_bed.intersected.merged,file=dREG_HD.filename,sep="\t",row.names=FALSE,quote=FALSE,col.names=FALSE);
 
-	dREG_HD.filename<-paste(bed_path,"_dREG_HD_relaxed.bed",sep="")
+	rm(list=c("dREG_HD_bed","dREG_HD_bed.intersected","dREG_HD_bed.intersected.merged"));
+	gc(verbose=TRUE, reset=TRUE);
 
-	dREG_HD_bed.intersected<-bedTools.2in ("bedtools intersect -u", dREG_HD_bed, dREG_bed)
-	dREG_HD_bed.intersected.merged<-bedTools.merge(dREG_HD_bed.intersected)
-	write.table(dREG_HD_bed.intersected.merged,file=dREG_HD.filename,sep="\t",row.names=FALSE,quote=FALSE,col.names=FALSE)
-
-	rm(list=c("dREG_HD_bed","dREG_HD_bed.intersected","dREG_HD_bed.intersected.merged"))
-	gc()
-
-	print("calling peaks under stringent condition")
+	print("calling peaks under stringent condition");
 
 	#stringent mode
-	dREG_HD_bed <-rbindlist(mclapply(X=1:ncores,FUN= cpu.fun, line.cutoff = line.cutoff ,returned_pred_data= returned_pred_data, knots.ratio= 1350,background= 0.02723683,mc.cores = ncores))
-	dREG_HD.filename<-paste(bed_path,"_dREG_HD_stringent.bed",sep="")
+	dREG_HD_bed <-rbindlist( mclapply( X=1:ncores, FUN= cpu.fun, knots.ratio= 1350,background= 0.02723683,mc.cores = ncores));
+	dREG_HD.filename<-paste(bed_path,"_dREG_HD_stringent.bed",sep="");
 
-	dREG_HD_bed.intersected<-bedTools.2in ("bedtools intersect -u", dREG_HD_bed, dREG_bed)
-	dREG_HD_bed.intersected.merged<-bedTools.merge(dREG_HD_bed.intersected)
-	write.table(dREG_HD_bed.intersected.merged,file=dREG_HD.filename,sep="\t",row.names=FALSE,quote=FALSE,col.names=FALSE)
-
+	dREG_HD_bed.intersected<-bedTools.2in ("bedtools intersect -u", dREG_HD_bed, dREG_bed);
+	dREG_HD_bed.intersected.merged<-bedTools.merge(dREG_HD_bed.intersected);
+	write.table(dREG_HD_bed.intersected.merged,file=dREG_HD.filename,sep="\t",row.names=FALSE,quote=FALSE,col.names=FALSE);
 }
 
