@@ -27,7 +27,7 @@ dREG.HD is only available for the Linux and Mac OSX. The source code can be down
     
 ### Install dREG.HD
 
-Please install the required R package before you install dREG.HD package. After the  installation of `dREG`, `snowfall` and `data.table` package, please install the #dREG.HD# as following steps.
+Please install the required R package before you install dREG.HD package. After the  installation of `dREG`, `snowfall` and `data.table` package, please install the **dREG.HD** as following steps.
 
 ```
 git clone https://github.com/Danko-Lab/dREG.HD.git
@@ -62,7 +62,9 @@ chromInfo       -- the chromInfo file required for generating bigwig file of imp
 
 ```
 
-An example is ./run_dREG-HD.bsh ./dREG.HD/inst/extdata/k562.predictions.3000.bed ./dREG.HD/inst/extdata/K562_unt.sort.bed.gz_plus.bw ./dREG.HD/inst/extdata/K562_unt.sort.bed.gz_minus.bw ./dREG.HD/inst/extdata/dREG_HD.model.rdata ./dREG.HD/inst/extdata/chromInfo.hg19 14 GPU
+An example is 
+
+bash ./run_dREG-HD.bsh ./dREG.HD/inst/extdata/k562.chr21.predictions.bed ./dREG.HD/inst/extdata/K562.chr21.plus.bw ./dREG.HD/inst/extdata/K562.chr21.minus.bw ./dREG.HD/inst/extdata/dREG_HD.model.rdata ./dREG.HD/inst/extdata/chromInfo.hg19 14 GPU
 
 
 dREG.HD needs the package `Rgtsvm` to run on GPU. This SVM package on GPU platform can be downloaded from (https://github.com/Danko-Lab/Rgtsvm.git)
@@ -74,9 +76,9 @@ dREG.HD is an R package, and that provides some additional flexibility for users
 
 ```
 
-prefix_imputedDnase.bw	      -- the imputed DNase-I signal.
-prefix_dREG_HD_relaxed.bed	  -- dREG.HD peaks called under relaxed condition (FDR=16%)
-prefix_dREG_HD_stringent.bed  -- dREG.HD peaks called under stringent condition (FDR=10%)
+${prefix}_imputedDnase.bw	      -- the imputed DNase-I signal.
+${prefix}_dREG_HD_relaxed.bed	  -- dREG.HD peaks called under relaxed condition (FDR=16%)
+${prefix}_dREG_HD_stringent.bed   -- dREG.HD peaks called under stringent condition (FDR=10%)
 
 ```
 
