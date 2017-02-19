@@ -318,24 +318,33 @@ dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus,chromInfo, model, ncores=1
 	gc(verbose=TRUE, reset=TRUE);
 
 	#Step three generate dREG HD peaks
-	imputed_dnase.bw<-load.bigWig(bw.filename);
-	returned_pred_data <-bed.step.bpQuery.bigWig(bw= imputed_dnase.bw,bed= dREG_bed_ext,step=1);
+	imputed_dnase.bw <- load.bigWig(bw.filename);
+	returned_pred_data <- bed.step.bpQuery.bigWig(bw= imputed_dnase.bw,bed= dREG_bed_ext,step=1);
 	unload.bigWig(imputed_dnase.bw);
-	gc(verbose=TRUE, reset=TRUE);
 
 	line.cutoff=as.integer(seq(from=0, to=length(returned_pred_data),length.out= ncores+1 ))
 	returned_pred_data_list <- list();
 	for( i in 1:(length(line.cutoff)-1) )
     	returned_pred_data_list[[i]] <- returned_pred_data[ c((line.cutoff[i]+1):line.cutoff[i+1])];
 
-	cpu.fun<-function(idx, knots.ratio,background){
-	    rbindlist(lapply(returned_pred_data_list[[idx]], FUN= split_peak, knots.ratio= knots.ratio, background= background));
+	rm(returned_pred_data);
+	gc(verbose=TRUE, reset=TRUE);
+
+	cpu.fun<-function( pred_data, knots.ratio, background){
+	    rbindlist(lapply( pred_data, FUN= split_peak, knots.ratio= knots.ratio, background= background));
 	}
 
 	#relaxed mode
 	print("calling peaks under relaxed condition");
-	dREG_HD_bed <- rbindlist( mclapply( 1:ncores, FUN= cpu.fun, knots.ratio= 397.4,background=0.02, mc.cores = ncores ) );
-	dREG_HD.filename<-paste(bed_path,"_dREG_HD_relaxed.bed",sep="");
+
+	# mclapply cause much more memory (ncore times ) are allocated potentially.
+	#dREG_HD_bed <- rbindlist( mclapply( returned_pred_data_list, FUN= cpu.fun, knots.ratio= 397.4,background=0.02, mc.cores = ncores ) );
+
+	sfInit(parallel = TRUE, cpus = ncores, type = "SOCK" );
+	dREG_HD_bed <- rbindlist( sfLapply( x = returned_pred_data_list,fun= cpu.fun, knots.ratio= 397.4,background=0.02 ) );
+	sfStop();
+
+	dREG_HD.filename <- paste(bed_path,"_dREG_HD_relaxed.bed",sep="");
 
 	dREG_HD_bed.intersected<-bedTools.2in ("bedtools intersect -u", dREG_HD_bed, dREG_bed);
 	dREG_HD_bed.intersected.merged<-bedTools.merge(dREG_HD_bed.intersected);
@@ -347,8 +356,13 @@ dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus,chromInfo, model, ncores=1
 	print("calling peaks under stringent condition");
 
 	#stringent mode
-	dREG_HD_bed <-rbindlist( mclapply( X=1:ncores, FUN= cpu.fun, knots.ratio= 1350,background= 0.02723683,mc.cores = ncores));
-	dREG_HD.filename<-paste(bed_path,"_dREG_HD_stringent.bed",sep="");
+	#dREG_HD_bed <-rbindlist( mclapply( X=1:ncores, FUN= cpu.fun, knots.ratio= 1350, background= 0.02723683,mc.cores = ncores));
+
+	sfInit(parallel = TRUE, cpus = ncores, type = "SOCK" );
+	dREG_HD_bed <- rbindlist( sfLapply(x = returned_pred_data_list,fun= cpu.fun, knots.ratio= 1350, background= 0.02723683 ) );
+	sfStop();
+
+	dREG_HD.filename <- paste(bed_path,"_dREG_HD_stringent.bed",sep="");
 
 	dREG_HD_bed.intersected<-bedTools.2in ("bedtools intersect -u", dREG_HD_bed, dREG_bed);
 	dREG_HD_bed.intersected.merged<-bedTools.merge(dREG_HD_bed.intersected);
