@@ -271,9 +271,16 @@ split.bed.evenly<-function(bed){
 
 }
 
+get.chromosome.info <- function(bw.plus, bw.minus)
+{
+    chrom <- rbind( cbind( bw.plus$chroms, bw.plus$chromSizes), cbind( bw.minus$chroms, bw.minus$chromSizes) );
+    chr.size <- unlist( lapply( unique(chrom[,1]), function(chr){max( as.numeric( chrom[which(chrom[,1]==chr),2])) } ) );
+	return(data.frame( V1=unique(chrom[,1]), V2=chr.size ));
+}
 
 #main function runs prediction for blocks of dREG_bed in parallel
-dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus,chromInfo, model, ncores=1, use_rgtsvm=FALSE){
+#dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus, #chromInfo, model, ncores=1, use_rgtsvm=FALSE){
+dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus, model, ncores=1, use_rgtsvm=FALSE){
 
 	#Step1: imputing Dnase-I signal in parallel mode
 	cat("running dREG-HD on ", bed_path,"\n");
@@ -286,7 +293,12 @@ dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus,chromInfo, model, ncores=1
 
 	ext=200 #impute on extended dREG site
 	dREG_bed<-read.table(bed_path);
-	chrom.info.table<-read.table(chromInfo);
+
+	#chrom.info.table<-read.table(chromInfo);
+	chrom.info.table <- get.chromosome.info( bw.plus, bw.minus );
+	chromInfo <- tempfile("chrom.info.");
+	write.table( chrom.info.table, file=chromInfo, quote=F, row.names=F, col.names=F, sep="\t");
+
 	dREG_bed_ext<-cbind.data.frame(dREG_bed$V1, apply(cbind(0,(dREG_bed$V2-ext)), MARGIN=1, FUN=max), apply(cbind(sapply(as.character(dREG_bed$V1), FUN= get.chrom.length, chrom.info.table),(dREG_bed$V3+ext)), MARGIN=1, FUN=min));
 	dREG_bed_ext<-bedTools.merge(dREG_bed_ext);
 
