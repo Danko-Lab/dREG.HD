@@ -11,27 +11,24 @@ model_path <- args[4]
 bed_path <- args[1]
 ps_plus_path  <- args[2]
 ps_minus_path <- args[3]
-chromInfo <- args[5]
-ncores <- as.integer(args[6])
+ncores <- as.integer(args[5])
 if (is.na(ncores)) ncores <- 1;
 
 use_rgtsvm <- FALSE;
-use_gpu <- toupper(as.character(args[7]))
-
+use_gpu <- toupper(as.character(args[6]))
 if (!is.na(use_gpu) && use_gpu=="GPU") use_rgtsvm <- TRUE;
 
 
-
 if (use_rgtsvm)
- {
+{
    if(!requireNamespace("Rgtsvm"))
    stop("Rgtsvm has not been installed fotr GPU computing.");
-  }
+}
 
 load(model_path);
 
 ## Now running dREG-HD
-t <- system.time( dREG_HD(bed_path= bed_path, bigwig_plus = ps_plus_path, bigwig_minus = ps_minus_path,chromInfo= chromInfo, model= model, ncores = ncores, use_rgtsvm= use_rgtsvm))
+t <- system.time( dREG_HD(bed_path= bed_path, bigwig_plus = ps_plus_path, bigwig_minus = ps_minus_path, model= model, ncores = ncores, use_rgtsvm= use_rgtsvm))
 
 cat("Running time [User]:", t[1], "[System]:", t[2], "[Elapsed]:", t[3], "\n");
 

@@ -2,13 +2,12 @@
 
 if [ "$#" -lt 5 ]; then
 	echo ""
-	echo "USAGE: bash run_dREG-HD.bsh dREG_bed plus_strand.bw minus_strand.bw HD_model.rdata chromInfo [nthreads] [GPU]"
+	echo "USAGE: bash run_dREG-HD.bsh dREG_bed plus_strand.bw minus_strand.bw HD_model.rdata [nthreads] [GPU]"
 	echo ""
 	echo "dREG_bed -- the dREG peaks in bed format."
 	echo "plus_strand.bw	-- PRO-seq data (plus  strand) formatted as a bigWig file."
 	echo "minus_strand.bw	-- PRO-seq data (minus strand) formatted as a bigWig file."
 	echo "HD_model.rdata	-- The path to the RData file containing the pre-trained dREG-HD SVM model."
-	echo "chromInfo  -- the chromInfo file required for generating bigwig file of imputed DNase-I signal."
 	echo "[nthreads]	-- [optional, default=1] The number of threads to use when evaluating dREG-HD sites."
 	echo "[GPU]	        -- [optional, gpu or blank, default is blank] indicating whether GPU package can be used."
 	echo ""
@@ -23,20 +22,19 @@ bed=$1
 bwPL=$2
 bwMN=$3
 model=$4
-chromInfo=$5
 gpu=FALSE
 ncores=1
 
 if [ "$#" -gt 5 ]; then
-	ncores=$6
+	ncores=$5
 else
 	ncores=1
 fi
 
 if [ "$#" -gt 6 ]; then
-	gpu=$7
+	gpu=$6
 fi
 
 
-echo "Using: R --vanilla --slave --args $bed $bwPL $bwMN $model $chromInfo $ncores $gpu < $bsh_path/run_dREG-HD.R"
-R --vanilla --slave --args $bed $bwPL $bwMN $model $chromInfo $ncores $gpu < $bsh_path/run_dREG-HD.R
+echo "Using: R --vanilla --slave --args $bed $bwPL $bwMN $model $ncores $gpu < $bsh_path/run_dREG-HD.R"
+R --vanilla --slave --args $bed $bwPL $bwMN $model $ncores $gpu < $bsh_path/run_dREG-HD.R
