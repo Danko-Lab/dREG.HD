@@ -15,7 +15,7 @@ tobigwig<-function(filename, temp.bg, chromInfo){
 
 	#write bedgraph formatted dataframes to tempfile
   	#write.table(bedgraph,file= bedgraph.file,quote=F,sep="\t",col.names=F,row.names=F)
-  	command=paste("LC_COLLATE=C sort -k1,1 -k2,2n", temp.bg, "| uniq >", bedgraph.sorted,sep=" ")
+  	command=paste("LC_ALL=C sort -k1,1 -k2,2n", temp.bg, "| uniq >", bedgraph.sorted,sep=" ")
   	#browser()
   	 try(system(command))
 
@@ -38,7 +38,7 @@ bedTools.merge<-function(bed)
   write.table(bed,file=a.file,quote=F,sep="\t",col.names=F,row.names=F)
 
   # create the command string and call the command using system()
-  command=paste("LC_COLLATE=C sort -k1,1 -k2,2n",a.file,"| mergeBed -i stdin >",out,sep=" ")
+  command=paste("LC_ALL=C sort -k1,1 -k2,2n",a.file,"| mergeBed -i stdin >",out,sep=" ")
   #cat(command,"\n")
   try(system(command))
 
