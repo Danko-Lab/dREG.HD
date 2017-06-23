@@ -25,13 +25,13 @@ model=$4
 gpu=FALSE
 ncores=1
 
-if [ "$#" -gt 5 ]; then
+if [ "$#" -gt 4 ]; then
 	ncores=$5
 else
 	ncores=1
 fi
 
-if [ "$#" -gt 6 ]; then
+if [ "$#" -gt 5 ]; then
 	gpu=$6
 fi
 
