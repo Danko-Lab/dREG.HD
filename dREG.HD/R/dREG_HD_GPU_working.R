@@ -1,3 +1,9 @@
+#' @importFrom bigWig bed.step.bpQuery.bigWig load.bigWig unload.bigWig
+#' @importFrom dREG genomic_data_model
+#' @importFrom data.table rbindlist
+#' @importFrom snow getMPIcluster
+#' @importFrom snowfall sfExport sfInit sfLapply sfRemoveAll sfStop
+
 #utility functions
 
 #get the chromosome length
@@ -280,6 +286,7 @@ get.chromosome.info <- function(bw.plus, bw.minus)
 
 #main function runs prediction for blocks of dREG_bed in parallel
 #dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus, #chromInfo, model, ncores=1, use_rgtsvm=FALSE){
+#' @export
 dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus, model, ncores=1, use_rgtsvm=FALSE){
 
 	#Step1: imputing Dnase-I signal in parallel mode

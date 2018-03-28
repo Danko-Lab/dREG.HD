@@ -10,14 +10,11 @@ Imports:
     bigWig (>= 0.2-9),
     dREG,
     data.table,
-    e1071,
-    graphics,
-    methods,
-    rphast,
     snowfall
 LinkingTo:
 Suggests:
-    Rgtsvm
+    Rgtsvm,
+    testthat
 Description: This package is an analysis pipeline for refining dREG peaks
 License: GPL-3
 Collate: get_genomic_data.R dREG_HD_GPU_working.R
@@ -28,3 +25,4 @@ Remotes:
     Danko-Lab/Rgtsvm/Rgtsvm,
     Danko-Lab/dREG/dREG,
     andrelmartins/bigWig/bigWig
+RoxygenNote: 6.0.1
