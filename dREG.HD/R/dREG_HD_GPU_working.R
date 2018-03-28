@@ -290,7 +290,7 @@ get.chromosome.info <- function(bw.plus, bw.minus)
 dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus, model, ncores=1, use_rgtsvm=FALSE){
 
 	#Step1: imputing Dnase-I signal in parallel mode
-	cat("running dREG-HD on ", bed_path,"\n");
+	message("running dREG-HD on ", bed_path);
 
 	bw.plus <- load.bigWig(bigwig_plus);
 	bw.minus <-  load.bigWig(bigwig_minus);
@@ -315,10 +315,10 @@ dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus, model, ncores=1, use_rgts
 	line.cutoff<-split.bed.evenly(dREG_bed_ext);
 	blocks<-length(line.cutoff)-1;
 
-	cat("number of total blocks=",blocks,"\n")
+	message("number of total blocks=",blocks)
 
 	cpu.fun<-function(idx, line.cutoff, dREG_bed_ext,bigwig_plus, bigwig_minus, gdm, model,total, temp.bg, ncores, use_rgtsvm){
-		print(idx);
+		message(idx);
 		dREG_bed_ext_part<-dREG_bed_ext[c((line.cutoff[idx]+1):line.cutoff[idx+1]),]
 		run_dREG_HD_pred(gdm=gdm, bed= dREG_bed_ext_part,bigwig_plus= bigwig_plus, bigwig_minus= bigwig_minus, model= model,total= total, temp.bg= temp.bg, ncores= ncores, use_rgtsvm= use_rgtsvm)
 	  	rm(list=ls());
@@ -354,7 +354,7 @@ dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus, model, ncores=1, use_rgts
 	}
 
 	#relaxed mode
-	print("calling peaks under relaxed condition");
+	message("calling peaks under relaxed condition");
 
 	# mclapply cause much more memory (ncore times ) are allocated potentially.
 	#dREG_HD_bed <- rbindlist( mclapply( returned_pred_data_list, FUN= cpu.fun, knots.ratio= 397.4,background=0.02, mc.cores = ncores ) );
@@ -372,7 +372,7 @@ dREG_HD<-function(bed_path, bigwig_plus, bigwig_minus, model, ncores=1, use_rgts
 	rm(list=c("dREG_HD_bed","dREG_HD_bed.intersected","dREG_HD_bed.intersected.merged"));
 	gc(verbose=TRUE, reset=TRUE);
 
-	print("calling peaks under stringent condition");
+	message("calling peaks under stringent condition");
 
 	#stringent mode
 	#dREG_HD_bed <-rbindlist( mclapply( X=1:ncores, FUN= cpu.fun, knots.ratio= 1350, background= 0.02723683,mc.cores = ncores));
