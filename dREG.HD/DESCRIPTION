@@ -1,15 +1,30 @@
 Package: dREG.HD
-Version: 1.0.0
+Version: 1.0.1
 Date: 2016-09-12
 Title: Refining dREG peaks by imputing DNase-I hypersensitivity site
 Author: Tinyi Chu, Charles G. Danko <tc532@cornell.edu>
 Maintainer: Tinyi Chu <tc532@cornell.edu>
-Depends: R (>= 2.14), bigWig (>= 0.2-9), e1071, rphast, dREG, graphics, snowfall, data.table, methods
+Depends:
+    R (>= 2.14)
+Imports:
+    bigWig (>= 0.2-9),
+    dREG,
+    data.table,
+    e1071,
+    graphics,
+    methods,
+    rphast,
+    snowfall
 LinkingTo:
-Suggests: Rgtsvm
+Suggests:
+    Rgtsvm
 Description: This package is an analysis pipeline for refining dREG peaks
 License: GPL-3
 Collate: get_genomic_data.R dREG_HD_GPU_working.R
 biocViews: Sequencing, Analysis
 LazyLoad: yes
 Packaged: 2016-09-12 16:09:08 UTC; tc532
+Remotes:
+    Danko-Lab/Rgtsvm/Rgtsvm,
+    Danko-Lab/dREG/dREG,
+    andrelmartins/bigWig/bigWig
